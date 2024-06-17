@@ -12,3 +12,44 @@ datasource db {
   provider = "sqlite"
   url      = "file:./dev.db"
 }
+
+model Audio {
+  id           String     @id @default(uuid())
+  hash         String     @unique
+  transcript   Transcript @relation(fields: [transcriptId], references: [id])
+  transcriptId String     @unique
+}
+
+model Transcript {
+  id        String              @id @default(uuid())
+  language  String
+  duration  Float
+  text      String
+  segments  TranscriptSegment[]
+  audioHash Audio?
+  summary   Summary?
+}
+
+model TranscriptSegment {
+  id           String      @id @default(uuid())
+  start        Float
+  end          Float
+  text         String
+  transcript   Transcript? @relation(fields: [transcriptId], references: [id])
+  transcriptId String?
+}
+
+model Summary {
+  id           String        @id @default(uuid())
+  text         String
+  transcript   Transcript    @relation(fields: [transcriptId], references: [id])
+  transcriptId String        @unique
+  summaryAudio SummaryAudio?
+}
+
+model SummaryAudio {
+  id        String  @id @default(uuid())
+  hash      String
+  summary   Summary @relation(fields: [summaryId], references: [id])
+  summaryId String  @unique
+}
